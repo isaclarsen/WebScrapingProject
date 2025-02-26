@@ -14,6 +14,7 @@ public class Main {
 
         WebClient webClient = createWebClient();
         ArrayList<String> urls = createUrlList();
+        CsnToJsonConverter converter = new CsnToJsonConverter();
 
         try{
             for (String url : urls) {
@@ -21,6 +22,7 @@ public class Main {
 
                 System.out.println(page.getTitleText());
 
+                String title = page.getTitleText();
 
                 String xpath = "//p[contains(@class, 'price')]//bdi";
 
@@ -28,8 +30,14 @@ public class Main {
 
                 System.out.println(priceElement.asNormalizedText());
 
+                String price = priceElement.asNormalizedText();
+
                 writeCsvFile(url, priceElement.asNormalizedText());
+
+                DiscordNotifier.sendToDiscord(title, price, url);
+
             }
+            CsnToJsonConverter.converter();
         } catch (FailingHttpStatusCodeException | IOException e) {
                 e.printStackTrace();
         }finally {
@@ -47,17 +55,21 @@ public class Main {
     }
 
     public static void writeCsvFile(String link, String price) throws IOException {
+        File file = new File("export.csv");
+        boolean fileExists = file.exists();
 
-        FileWriter recipesFile = new FileWriter("export.csv", true);
+        FileWriter recipesFile = new FileWriter(file, true);
 
-        recipesFile.write("link, price\n");
+        if(!fileExists){
+            recipesFile.write("link, price\n");
+        }
 
-        recipesFile.write(link + ", " + price);
+        recipesFile.write(link + ", " + price + "\n");
 
         recipesFile.close();
     }
 
-    public static ArrayList createUrlList(){
+    public static ArrayList<String> createUrlList(){
         ArrayList<String> urlList = new ArrayList<String>();
         urlList.add("https://streetlab.nu/product/carhartt-wip-industry-beanie-lumo-tellow/");
         urlList.add("https://streetlab.nu/product/eva-skateboards-eva-og-beanie-grey/");
