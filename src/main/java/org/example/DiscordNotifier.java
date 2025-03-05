@@ -1,5 +1,6 @@
 package org.example;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -55,6 +56,56 @@ public class DiscordNotifier{
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void leaguePatchNotifier(String patch, String date, String url) throws Exception {
+        String eshaagUrl = "https://assets.vogue.com/photos/5891f06eb482c0ea0e4dbbdf/master/pass/slideshow-kurt-cobain-last-session-jesse-frohman-07.jpeg";
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        //skapar json
+        ObjectNode payload = objectMapper.createObjectNode();
+        payload.put("username", "League Patch Notes");
+
+        //Skapa webhook embed
+        ObjectNode embed = objectMapper.createObjectNode();
+        embed.putObject("author").put("name", "@eshaag");
+        embed.put("color", "14177041");
+
+
+        //Skapa fields lista
+        ArrayNode fields = objectMapper.createArrayNode();
+
+        //Patch
+        ObjectNode patchField = objectMapper.createObjectNode();
+        patchField.put("name", "Ny uppdatering till League har släppts");
+        patchField.put("value", patch);
+        patchField.put("inline", true);
+        fields.add(patchField);
+
+        //URL
+        ObjectNode urlField = objectMapper.createObjectNode();
+        urlField.put("name", "URL");
+        urlField.put("value", url);
+        fields.add(urlField);
+
+        //Date
+        ObjectNode dateField = objectMapper.createObjectNode();
+        dateField.put("name", "Date");
+        dateField.put("value", date);
+        fields.add(dateField);
+
+        //sätt in fälten i webhook embed
+        embed.set("fields", fields);
+        embed.putObject("thumbnail").put("url", eshaagUrl);
+
+        ArrayNode embeds = objectMapper.createArrayNode();
+        embeds.add(embed);
+        payload.set("embeds", embeds);
+
+        String jsonString = objectMapper.writeValueAsString(payload);
+
+        sendHttpPost(jsonString);
     }
 
     private static void sendHttpPost(String jsonPayload) throws Exception {
