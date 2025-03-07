@@ -11,7 +11,7 @@ import java.net.URL;
 
 public class DiscordNotifier{
 
-    private static final String DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1344319381324169246/LQrXMmjLkp77kKyElX1poWkKucVTtQsmbZZCJFr9RC47yiL5bi4_X9sGZpSB_nW4f5Yu";
+    private static final String DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1347130371497529354/AMAHMN3GO39f3OhNNtLmSukKAy2w3sfKqRaTgJZIaIe1HswduD0qtV5PSSRlGS0FxRKe";
 
     public static void sendToDiscord(String productName, String price, String url) {
         try {
@@ -59,17 +59,17 @@ public class DiscordNotifier{
     }
 
     public static void leaguePatchNotifier(String patch, String date, String url) throws Exception {
-        String eshaagUrl = "https://assets.vogue.com/photos/5891f06eb482c0ea0e4dbbdf/master/pass/slideshow-kurt-cobain-last-session-jesse-frohman-07.jpeg";
+        String leagueLogo = "https://brand.riotgames.com/static/a91000434ed683358004b85c95d43ce0/8a20a/lol-logo.png";
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         //skapar json
         ObjectNode payload = objectMapper.createObjectNode();
-        payload.put("username", "League Patch Notes");
+        payload.put("username", "League of Legends");
 
         //Skapa webhook embed
         ObjectNode embed = objectMapper.createObjectNode();
-        embed.putObject("author").put("name", "@eshaag");
+        embed.putObject("author").put("name", "League Patch Notes");
         embed.put("color", "14177041");
 
 
@@ -78,7 +78,7 @@ public class DiscordNotifier{
 
         //Patch
         ObjectNode patchField = objectMapper.createObjectNode();
-        patchField.put("name", "Ny uppdatering till League har släppts");
+        patchField.put("name", "Nya League of Legends nyheter!");
         patchField.put("value", patch);
         patchField.put("inline", true);
         fields.add(patchField);
@@ -95,9 +95,13 @@ public class DiscordNotifier{
         dateField.put("value", date);
         fields.add(dateField);
 
+        ObjectNode footerField = objectMapper.createObjectNode();
+        footerField.put("text", "@eshaag");
+
         //sätt in fälten i webhook embed
         embed.set("fields", fields);
-        embed.putObject("thumbnail").put("url", eshaagUrl);
+        embed.set("footer", footerField);
+        embed.putObject("thumbnail").put("url", leagueLogo);
 
         ArrayNode embeds = objectMapper.createArrayNode();
         embeds.add(embed);

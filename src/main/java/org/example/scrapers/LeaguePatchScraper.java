@@ -7,11 +7,18 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.example.CsnToJsonConverter;
 import org.example.DiscordNotifier;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.example.Main.*;
 
 public class LeaguePatchScraper {
+    static Random rand = new Random();
     public static void leaguePatchNotesScraper(){
         WebClient webClient = createWebClient();
         String url = "https://www.leagueoflegends.com/en-us/news/tags/patch-notes/";
@@ -46,12 +53,49 @@ public class LeaguePatchScraper {
             System.out.println(dateElement.getTextContent());
             System.out.println("https://www.leagueoflegends.com" + urlElement.getAttribute("href"));
 
-            writeCsvFileLeaguePatch(patchUrl, patch, date);
-            DiscordNotifier.leaguePatchNotifier(patch, date, patchUrl);
+            String lastPatch = getLastPatchFromCSV("leaguePatch.csv");
+
+            if(!patch.equals(lastPatch)){
+                System.out.println("New patch detected!");
+                writeCsvFileLeaguePatch(patchUrl, patch, date);
+                DiscordNotifier.leaguePatchNotifier(patch, date, patchUrl);
+            }else
+                System.out.println("No new patch yet");
+
 
 
         }catch (Exception e) {
             e.printStackTrace();
         }
+        webClient.close();
+    }
+
+    public static String getLastPatchFromCSV(String filepath){
+        String lastLine = "";
+        try(BufferedReader br = new BufferedReader(new FileReader(filepath))){
+            String line;
+            while((line = br.readLine()) != null){
+                lastLine = line;
+            }
+        } catch (IOException e) {
+            System.out.println("Could not read CSV! Probably empty");
+            return null;
+        }
+        return lastLine.split(",")[0];
+    }
+
+    public static void patchMonitor(){
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        scheduler.scheduleAtFixedRate(() -> {
+            try{
+//
+                System.out.println("Checking for patch...");
+                LeaguePatchScraper.leaguePatchNotesScraper();
+            }catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Something went wrong!");
+            }
+        }, 0, 5, TimeUnit.MINUTES);
     }
 }

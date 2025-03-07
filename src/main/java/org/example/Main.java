@@ -1,6 +1,7 @@
 package org.example;
 
 import com.gargoylesoftware.htmlunit.*;
+import org.example.scrapers.LeagueNewsScraper;
 import org.example.scrapers.LeaguePatchScraper;
 import org.example.scrapers.StreetLabScraper;
 
@@ -13,7 +14,10 @@ import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) {
-        LeaguePatchScraper.leaguePatchNotesScraper();
+//        LeaguePatchScraper.patchMonitor();
+//        LeaguePatchScraper.getLastPatchFromCSV("leaguePatch.csv");
+//        LeagueNewsScraper.leagueNewsScraper();
+        LeagueNewsScraper.monitor();
 
     }
     public static WebClient createWebClient() {
@@ -50,6 +54,21 @@ public class Main {
         }
 
         recipesFile.write(patch + ", " + date + ", " + url + "\n");
+
+        recipesFile.close();
+    }
+
+    public static void writeCsvFileLeagueNews(String url, String title, String date) throws IOException {
+        File file = new File("leagueNews.csv");
+        boolean fileExists = file.exists();
+
+        FileWriter recipesFile = new FileWriter(file, true);
+
+        if(!fileExists){
+            recipesFile.write("date, title, url\n");
+        }
+
+        recipesFile.write(date + ", " + title + ", " + url + "\n");
 
         recipesFile.close();
     }
